@@ -14,6 +14,10 @@ int main() {
 	// Variables
 	int serv_fd;
 	struct sockaddr_in addr;
+	socklen_t addr_len = sizeof(addr);
+	char buffer[1024] = { 0 };
+	char* serv_msg = "Server Msg: Hello, you are connected!";
+	ssize_t read_value;
 
 	// Create server (and file descriptor)
 	serv_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -32,18 +36,45 @@ int main() {
 		return 1;
 	}
 
+	
+	// Zero address struct (good practice apparently)
+	memset(&addr, 0, sizeof(addr));
+	
 	// Bind Port to Socket
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(PORT);
 	addr.sin_addr.s_addr = INADDR_ANY;
 
 	int bnd = bind(serv_fd, (struct sockaddr*) &addr, sizeof(addr));
-	if (bind < 0) {
+	if (bnd < 0) {
 		perror("Error binding port");
 		return 1;
 	}
+
+	// Listen for Client
+	int listen_check = listen(serv_fd, 5); // Backlog Queue set to 5
+	if (listen_check < 0) {
+		perror("Failed to listen for any clients");
+		return 1;
+	}
+
+	// Accept client connection
+	int client_socket = accept(serv_fd, (struct sockaddr*)&addr, &addr_len);
+	if (client_socket < 0) {
+		perror("Failed to accept client connection");
+		return 1;
+	}
+
+	// Send client server message
+	send(client_socket, serv_msg, strlen(serv_msg), 0);
+
+	// Read Message sent from client and print
+	read_value = read(client_socket, buffer, sizeof(buffer) - 1);
+	printf("Client Msg:\n%s\n", buffer);
+
 	
-	// Close Socket
+	// Close Socket and Client Conenction
+	close(client_socket);
 	close(serv_fd);
 	return 0;
 }
