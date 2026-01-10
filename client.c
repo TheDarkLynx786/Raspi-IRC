@@ -32,7 +32,7 @@ int main() {
         serv_addr.sin_port = htons(PORT);
 
         // Convert IPv4/IPv6 addresses from text to binary
-        int addr_chk = inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr);
+        int addr_chk = inet_pton(AF_INET, "0.0.0.0", &serv_addr.sin_addr);
         if (addr_chk < 0) {
                 perror("Invalid or unsupported address");
                 return 1;
